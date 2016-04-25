@@ -52,6 +52,14 @@ namespace Skunkworks.Ics.Web.Controllers
             }
         }
 
+        public ApplicationRoleManager RoleManager
+        {
+            get
+            {
+                return Request.GetOwinContext().Get<ApplicationRoleManager>();
+            }
+        }
+
         //
         // GET: /Account/Login
         [AllowAnonymous]
@@ -155,7 +163,31 @@ namespace Skunkworks.Ics.Web.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
+                    user = await UserManager.FindByEmailAsync(user.Email);
+
+                    var roleStatus = new IdentityResult();
+
+                    // Add to user role
+                    var role = await RoleManager.FindByNameAsync("User");
+                    if (role != null)
+                    {
+                        roleStatus = await UserManager.AddToRoleAsync(user.Id, role.Name);
+                    }
+
+                    // If role added send verification mail
+                    if (roleStatus.Succeeded)
+                    {
+                        // Send email verification link
+                        string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                        var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                        await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                    }
+                    else
+                    {
+                        await UserManager.DeleteAsync(user);
+                    }
+
+                    //await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
                     
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
@@ -175,9 +207,9 @@ namespace Skunkworks.Ics.Web.Controllers
         //
         // GET: /Account/ConfirmEmail
         [AllowAnonymous]
-        public async Task<ActionResult> ConfirmEmail(string userId, string code)
+        public async Task<ActionResult> ConfirmEmail(int userId, string code)
         {
-            if (userId == null || code == null)
+            if (userId == 0 || code == null)
             {
                 return View("Error");
             }

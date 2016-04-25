@@ -1,0 +1,7 @@
+﻿CREATE TABLE [dbo].[UserClaim]
+(
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
+    [UserId] INT NOT NULL, 
+    [ClaimValue] NVARCHAR(100) NOT NULL, 
+    [ClaimType] NVARCHAR(100) NOT NULL
+)
