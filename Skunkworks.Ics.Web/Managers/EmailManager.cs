@@ -42,9 +42,15 @@ namespace Skunkworks.Ics.Web.Managers
                 IsBodyHtml = true
             };
 
-
-            // Send:
-            return client.SendMailAsync(mail);
+            try
+            {
+                // Send:
+                return client.SendMailAsync(mail);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }
