@@ -14,9 +14,9 @@ namespace Skunkworks.Ics.Web.Managers
         public Task SendAsync(IdentityMessage message)
         {
             // Credentials:
-            const string credentialUserName = "colinthomas";
-            const string sentFrom = "GoodTyms <no-reply@goodtyms.com>";
-            const string pwd = "kundaraRamona1";
+            const string credentialUserName = "";
+            const string sentFrom = "";
+            const string pwd = "";
 
             // Configure the client:
             var client = new SmtpClient("smtp.sendgrid.net")
